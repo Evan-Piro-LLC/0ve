@@ -1,0 +1,48 @@
+{
+  "name": "near-hackathon",
+  "description": "TDB",
+  "version": "0.0.1",
+  "scripts": {
+    "build-contract": "cd contract && cargo build --target wasm32-unknown-unknown --release && cp target/wasm32-unknown-unknown/release/near_hackathon.wasm ../out/main.wasm",
+    "init:testnet": "npm run build-contract && NEAR_ENV=testnet near deploy --initFunction new --initArgs '{}'",
+    "deploy:testnet": "npm run build-contract && NEAR_ENV=testnet near deploy",
+    "deploy:local": "npm run build-contract && NEAR_ENV=local near deploy",
+    "deploy:cleanup": "NEAR_ENV=testnet near deploy --wasmFile=bin/state_cleanup.wasm",
+    "state:testnet": "NEAR_ENV=testnet near view-state app.evanpiro.testnet --finality final",
+    "dl-keys": "ECHO \"module.exports.default=\" > utils/keys.js && NEAR_ENV=testnet near view-state app.evanpiro.testnet --finality final >> utils/keys.js",
+    "run:cleanup": "npm run dl-keys && NEAR_ENV=testnet near call app.evanpiro.testnet clean $(node utils/keysToArgs) --accountId=evanpiro.testnet",
+    "reset:testnet": "npm run deploy:cleanup && npm run run:cleanup && npm run deploy:testnet",
+    "reset:local": "near delete app.test.near test.near && near create-account app.test.near --masterAccount test.near && npm run deploy:local",
+    "start:local": "ELM_APP_NEAR_ENV=local elm-app start",
+    "start:testnet": "ELM_APP_NEAR_ENV=testnet elm-app start",
+    "deploy:spa": "npm install -g create-elm-app && ELM_APP_NEAR_ENV=testnet elm-app build",
+    "deploy:ipfs": "npm install -g create-elm-app && ELM_APP_NEAR_ENV=testnet PUBLIC_URL=./ elm-app build",
+    "test:cargo": "cd contract && cargo test -- --nocapture",
+    "build-tw": "elm-tailwind-modules --dir src --tailwind-config tailwind.config.js",
+    "build-css": "node-sass-chokidar src/ -o src/",
+    "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive"
+  },
+  "devDependencies": {
+    "env-cmd": "^10.1.0",
+    "jest": "~27.3.1",
+    "jest-environment-node": "~27.3.1",
+    "near-cli": "^2.1.1",
+    "nodemon": "~2.0.14",
+    "postcss": "^8.4.5",
+    "prettier": "^2.5.1"
+  },
+  "jest": {
+    "testEnvironment": "near-cli/test_environment"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.16.7",
+    "babel": "^6.23.0",
+    "dotenv": "^10.0.0",
+    "elm-canvas": "^2.2.4",
+    "elm-tailwind-modules": "^0.3.2",
+    "near-api-js": "^0.43.1",
+    "postcss": "^8.4.4",
+    "regenerator-runtime": "^0.13.9",
+    "tailwindcss": "^2.2.19"
+  }
+}
